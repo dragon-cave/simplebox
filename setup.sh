@@ -45,6 +45,7 @@ cd ..
 vim nginx.conf
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
 sudo cp nginx.conf /etc/nginx/sites-available/simplebox
+sudo ln -s /etc/nginx/sites-available/simplebox /etc/nginx/sites-enabled/simplebox
 sudo systemctl enable nginx
 sudo systemctl start nginx
 sudo nginx -s reload
