@@ -4,31 +4,46 @@ Esta seção apresenta uma visão geral da arquitetura de software da aplicaçã
 
 ## Componentes
 
-A aplicação segue o modelo de implantação em nuvem, utilizando para isso frameworks de implementação e serviços presentes na Amazon Web Services (AWS). Os componentes estão divididos da seguinte forma:
+A aplicação segue o modelo de implantação em nuvem, utilizando para isso o framework [Django](https://docs.djangoproject.com/en/5.0/) da linguagem Python combinado a biblioteca Django REST framework para criação de APIs web, além da utilização de serviços da Amazon Web Services ([AWS](https://docs.aws.amazon.com/?nc2=h_ql_doc_do)). Os componentes do sistema estão divididos da seguinte forma:
 
-**View:** Esta camada lida com as requisições vindas do navegador do cliente, tendo a função de interface e ponto de interação com os usuários.Composta por instâncias da Amazon Elastic Compute Cloud ([EC2](https://docs.aws.amazon.com/pt_br/AWSEC2/latest/UserGuide/concepts.html)), que hospedam os templates React em JavaScript com definições de layouts e estruturas renderizadas na interface da aplicação.
+**Model:** Camada responsável por conter a estrutura lógica e relacionamento entre dados da aplicação, os serviços da AWS utilizados para a persistência desses dados foram Amazon Simple Storage Service ([Amazon S3](https://aws.amazon.com/pt/pm/serv-s3/)) no armazenamento dos arquivos multimídia como imagens,áudios e vídeos e o Amazon Relational Database Service ([Amazon RDS](https://docs.aws.amazon.com/pt_br/AmazonRDS/latest/UserGuide/Welcome.html)) utilizando [PostgresSQL](https://www.postgresql.org/docs/) para dados de usuários e arquivos.
 
-**Controller:** Esta camada realiza o despacho dos pedidos feitos pelo lado do cliente para os serviços corretos na camada de modelo e devolve essas respostas de volta ao cliente. Implementada em arquivos de extensão ".controller" nos módulos da aplicação.
+**View:** Esta camada interpreta e atende requisições originadas pelo sistema do cliente( por meio de endpoints), realizando comandos de criação, atualização, leitura e exclusão de dados  utilizando classes definidas  na camada model para retornar as informações a camada de Template.
 
-**Model:** É onde se encontram as classes que representam as entidades que fazem parte do domínio da aplicação, podendo conter suas lógicas de negócio, estado e interagir com o banco de dados para operações de leitura e escrita persistente. Para essa aplicação, utiliza-se o Amazon Simple Storage Service ([Amazon S3](https://aws.amazon.com/pt/pm/serv-s3/)) e o Amazon Relational Database Service ([Amazon RDS](https://docs.aws.amazon.com/pt_br/AmazonRDS/latest/UserGuide/Welcome.html)) com [MySQL](https://www.mysql.com/downloads/) integrado ao ORM  [Prisma](https://www.prisma.io/docs/getting-started) para ,respectivamente, armazenar objetos multimídia e dados de usuários e desses objetos.
+**Template** :  templates [React](https://react.dev/learn) em JavaScript com definições de layouts e estruturas renderizadas na interface da aplicação para interação com usuário e geração de requisições para atendimento pela camada View.
+
+**Controller:** O framework segue o modelo MVT(Model-View-Template), porém funciona internamente como controller para a aplicação.
+  
 
 ## Funcionamento da Aplicação
-[![Arquitetura Simplebox](architecture-img/Frontend-Architecture.png)](architecture-img/Frontend-Architecture.png)
-**Acesso do usuário**
- As Requisições feitas pelo usuário ocorrem na aplicação por meio de sua interação com instâncias EC2 [React](https://react.dev/learn/installation) em execução na Amazon Virtual Private Cloud(VPC) para serem encaminhadas a instâncias do lado servidor.
- 
-**Balanceamento de carga**
-Todas o acesso a instâncias React da aplicação e requisições que partem destas para as instâncias EC2 [Nestjs](https://docs.nestjs.com/first-steps) em execução no lado servidor são, antes de qualquer interação com esses componentes, distribuídas pelo serviço [AWS Elastic Load Balancing](https://docs.aws.amazon.com/pt_br/elasticloadbalancing/latest/userguide/what-is-load-balancing.html) de forma a se atingir um balanço de carga entre as instâncias ativas,contribuindo para o desempenho, escalabilidade e disponibilidade da aplicação.
-
-**AutoScaling**
-Em casos mais extremos em que o balanço for detectado como  insuficiente(aplicação atingir acima de 80% da capacidade de processamento ou RAM do servidor principal) nos dados fornecidos pelo serviço de monitoramento [Amazon CloudWatch](https://docs.aws.amazon.com/pt_br/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html) ocorrerá a intervenção do serviço de nuvem Amazon responsável pelo ajuste na quantidade de instâncias e recursos para instâncias EC2, [Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/pt_br/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html), que criará uma nova instância na área que houver necessidade para a manutenção de desempenho e disponibilidade da aplicação.
-
-[![Arquitetura Simplebox](architecture-img/Backend-Architecture.png)](architecture-img/Backend-Architecture.png)
-**Servidor da aplicação e Persistência de dados**
-As instâncias ativas que recebem as requisições do cliente e as atendem realizando o gerenciamento e operações CRUD sobre dos objetos do usuário armazenados de forma persistente em instâncias  Amazon S3 e Amazon RDS, o acesso e manipulação de dados no RDS sendo feito com uso do Prisma para simplificar o uso de operações em banco de dados. As permissões de leitura e escrita no Amazon S3 e RDS são definidas nas configurações presentes no Amazon Identity and Access Management ([IAM](https://aws.amazon.com/pt/iam/)) referentes a cada um deles.
-
-**SDK AWS**
-O Software Development Kit(SDK) disponibilizado pela AWS permite uma utilização mais prática e eficiente de recursos e serviços disponíveis na plataforma, e na aplicação seu uso é voltado para  o gerenciamento de instâncias de banco de dados,EC2 e outros mais utilizados de forma programada e automatizada. 
 
 ## Visão Completa da arquitetura
+
 [![Arquitetura Simplebox](architecture-img/Full-Architecture.png)](architecture-img/Full-Architecture.png)
+
+**Acesso do usuário**
+
+Cada instância EC2 criada na VPC Amazon([Amazon Virtual Private Cloud](https://aws.amazon.com/pt/vpc/)) executa tanto o lado cliente como lado servidor da aplicação, com as requisições geradas no lado cliente sendo atendidas pelo lado servidor da instância.
+
+**Balanceamento de carga**
+
+Todas o acesso a instâncias da aplicação pelos navegadores dos usuários são distribuídas pelo serviço [AWS Elastic Load Balancing](https://docs.aws.amazon.com/pt_br/elasticloadbalancing/latest/userguide/what-is-load-balancing.html) de forma a garantir o balanço de carga entre as instâncias ativas,contribuindo para um melhor desempenho, escalabilidade e disponibilidade da aplicação.
+
+**AutoScaling**
+
+Através de dados fornecidos pelo serviço de monitoramento [Amazon CloudWatch](https://docs.aws.amazon.com/pt_br/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html)
+é feito o diagnóstico de funcionamento da aplicação ocorrendo a intervenção do serviço Amazon responsável pelo ajuste na quantidade de instâncias e recursos para instâncias EC2, o  [Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/pt_br/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html), que cria nova instância da aplicação na VPC quando o sistema está sobrecarregado( acima de 80% da capacidade de processamento ou RAM do servidor principal) garantindo assim a disponibilidade da solução em nuvem.
+  
+**Servidor da aplicação e Persistência de dados**
+
+As instâncias ativas que recebem as requisições do cliente e as atendem realizando o gerenciamento e operações CRUD sobre dos objetos do usuário armazenados de forma persistente em instâncias Amazon S3 e Amazon RDS, o acesso e manipulação de dados no RDS sendo feito com uso do Prisma para simplificar o uso de operações em banco de dados. As permissões de leitura e escrita no Amazon S3 e RDS são definidas nas configurações presentes no Amazon Identity and Access Management ([IAM](https://aws.amazon.com/pt/iam/)) referentes a cada um deles.
+
+**Persistência de dados**
+
+As instâncias ativas que recebem as requisições do cliente e as atendem realizando o gerenciamento e operações CRUD sobre dos objetos do usuário armazenados de forma persistente em instâncias Amazon S3 e Amazon RDS, o acesso e manipulação de dados no RDS sendo feito com uso do Prisma para simplificar o uso de operações em banco de dados. As permissões de leitura e escrita no Amazon S3 e RDS são definidas nas configurações presentes no Amazon Identity and Access Management ([IAM](https://aws.amazon.com/pt/iam/)) referentes a cada um deles.
+
+O gerenciamento e operações CRUD sobre objetos do usuário armazenados de forma persistente nos serviços de armazenamento Amazon S3 e Amazon RDS são delimitados por permissões de leitura e escrita definidas nas configurações presentes no Amazon Identity and Access Management([IAM](https://aws.amazon.com/pt/iam/)) referentes a cada um dos serviços. 
+
+**SDK AWS**
+
+Utilizando o SDK(Software Development Kit) Boto3 da AWS, recursos e serviços disponíveis na plataforma são utilizados de forma mais prática e eficiente, na aplicação alguns seu uso é o gerenciamento de instâncias de armazenamento como S3 e outros serviços como EC2 de forma programada.
