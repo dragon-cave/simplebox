@@ -1,0 +1,101 @@
+``` plantuml
+@startuml
+
+!define AWSPUML https://raw.githubusercontent.com/milo-minderbinder/AWS-PlantUML/release/18-2-22/dist
+
+!define DEVICONS2 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+
+  
+
+!includeurl AWSPUML/common.puml
+
+!includeurl AWSPUML/General/AWScloud/AWScloud.puml
+
+!includeurl AWSPUML/General/client/client.puml
+
+!includeurl AWSPUML/General/user/user.puml
+
+!includeurl AWSPUML/SDKs/Python/Python.puml
+
+!includeurl AWSPUML/Compute/AmazonEC2/AmazonEC2.puml
+
+!includeurl AWSPUML/Compute/AmazonEC2/instance/instance.puml
+
+!includeurl AWSPUML/Storage/AmazonS3/AmazonS3.puml
+
+!includeurl AWSPUML/Storage/AmazonS3/bucket/bucket.puml
+
+!includeurl AWSPUML/Database/AmazonRDS/AmazonRDS.puml
+
+!includeurl AWSPUML/Database/AmazonRDS/DBinstance/DBinstance.puml
+
+!includeurl AWSPUML/NetworkingContentDelivery/AmazonVPC/AmazonVPC.puml
+
+!includeurl AWSPUML/NetworkingContentDelivery/ElasticLoadBalancing/ElasticLoadBalancing.puml
+
+!includeurl AWSPUML/ManagementTools/AmazonCloudWatch/AmazonCloudWatch.puml
+
+!includeurl AWSPUML/Compute/AmazonEC2/AutoScaling/AutoScaling.puml
+
+!includeurl AWSPUML/SecurityIdentityCompliance/AWSIAM/AWSIAM.puml
+
+  
+
+!include DEVICONS2/django.puml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!include DEVICONS/react.puml
+
+!include DEVICONS/postgresql.puml
+
+!include DEVICONS/nginx.puml
+
+skinparam componentArrowColor Black
+
+skinparam componentBackgroundColor White
+
+skinparam nodeBackgroundColor White
+
+skinparam agentBackgroundColor Transparent
+
+skinparam artifactBackgroundColor White
+
+
+USER(user1, user1)
+CLIENT(browser1, browser1)
+AMAZONVPC(vpc) {
+
+    AMAZONEC2(ec2)  {
+        INSTANCE(instancia1,Client1) {
+            Container(nginxServer, "Server", "Nginx", "HTTPS server and Reverse Proxy", $sprite="nginx")
+
+            System_Boundary(c0,"Frontend/backend") {
+                Container(web_client1, "Client", "React", "Main user interaction interface", $sprite="react")
+                Container(web_server, "Server", "Django", "Processes Client requests", $sprite="django")
+            }
+        }
+    }
+
+    AMAZONRDS(rds) {
+        Container(BD, "Database", "Postgres", "", $sprite="postgresql")
+        DBINSTANCE(banco,Database)
+    }
+}
+
+user1 -> browser1
+
+browser1 -d-> nginxServer
+
+nginxServer -d-> web_client1
+nginxServer -d-> web_server
+
+web_server -d--> BD
+
+web_client1 --> nginxServer
+
+
+@enduml
+```
