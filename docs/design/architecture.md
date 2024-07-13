@@ -13,7 +13,7 @@ A aplicação segue o modelo de implantação em nuvem, utilizando para isso o f
 **Template** :  templates [React](https://react.dev/learn) em JavaScript com definições de layouts e estruturas renderizadas na interface da aplicação para interação com usuário e geração de requisições para atendimento pela camada View.
 
 **Controller:** O framework segue o modelo MVT(Model-View-Template), porém funciona internamente como controller para a aplicação.
-  
+    
 
 ## Funcionamento da Aplicação
 
@@ -31,19 +31,8 @@ Todas o acesso a instâncias da aplicação pelos navegadores dos usuários são
 
 **AutoScaling**
 
-Através de dados fornecidos pelo serviço de monitoramento [Amazon CloudWatch](https://docs.aws.amazon.com/pt_br/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html)
-é feito o diagnóstico de funcionamento da aplicação ocorrendo a intervenção do serviço Amazon responsável pelo ajuste na quantidade de instâncias e recursos para instâncias EC2, o  [Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/pt_br/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html), que cria nova instância da aplicação na VPC quando o sistema está sobrecarregado( acima de 80% da capacidade de processamento ou RAM do servidor principal) garantindo assim a disponibilidade da solução em nuvem.
-  
-**Servidor da aplicação e Persistência de dados**
-
-As instâncias ativas que recebem as requisições do cliente e as atendem realizando o gerenciamento e operações CRUD sobre dos objetos do usuário armazenados de forma persistente em instâncias Amazon S3 e Amazon RDS, o acesso e manipulação de dados no RDS sendo feito com uso do Prisma para simplificar o uso de operações em banco de dados. As permissões de leitura e escrita no Amazon S3 e RDS são definidas nas configurações presentes no Amazon Identity and Access Management ([IAM](https://aws.amazon.com/pt/iam/)) referentes a cada um deles.
+Através de dados fornecidos pelo serviço de monitoramento [Amazon CloudWatch](https://docs.aws.amazon.com/pt_br/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html) é feito o diagnóstico de funcionamento da aplicação, ocorrendo a intervenção do serviço Amazon responsável pelo ajuste na quantidade e recursos para instâncias EC2, o  [Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/pt_br/autoscaling/ec2/userguide what-is-amazon-ec2-auto-scaling.html), que cria nova instância da aplicação na VPC quando o sistema está sobrecarregado( acima de 80% da capacidade de processamento ou RAM do servidor principal) garantindo assim a disponibilidade da solução.
 
 **Persistência de dados**
 
-As instâncias ativas que recebem as requisições do cliente e as atendem realizando o gerenciamento e operações CRUD sobre dos objetos do usuário armazenados de forma persistente em instâncias Amazon S3 e Amazon RDS, o acesso e manipulação de dados no RDS sendo feito com uso do Prisma para simplificar o uso de operações em banco de dados. As permissões de leitura e escrita no Amazon S3 e RDS são definidas nas configurações presentes no Amazon Identity and Access Management ([IAM](https://aws.amazon.com/pt/iam/)) referentes a cada um deles.
-
 O gerenciamento e operações CRUD sobre objetos do usuário armazenados de forma persistente nos serviços de armazenamento Amazon S3 e Amazon RDS são delimitados por permissões de leitura e escrita definidas nas configurações presentes no Amazon Identity and Access Management([IAM](https://aws.amazon.com/pt/iam/)) referentes a cada um dos serviços. 
-
-**SDK AWS**
-
-Utilizando o SDK(Software Development Kit) Boto3 da AWS, recursos e serviços disponíveis na plataforma são utilizados de forma mais prática e eficiente, na aplicação alguns seu uso é o gerenciamento de instâncias de armazenamento como S3 e outros serviços como EC2 de forma programada.
