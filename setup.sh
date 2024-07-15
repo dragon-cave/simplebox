@@ -26,6 +26,7 @@ Description=systemd service for running the SimpleBox API
 
 [Service]
 ExecStart=/bin/bash $PWD/run.sh
+EnvironmentFile=$PWD/.env
 
 [Install]
 WantedBy=multi-user.target" > simplebox-api.service
