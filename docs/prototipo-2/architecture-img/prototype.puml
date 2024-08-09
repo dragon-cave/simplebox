@@ -1,157 +1,324 @@
 ``` plantuml
-@startuml
+
+@startuml prototype
+
+  
 
 !define AWSPUML https://raw.githubusercontent.com/milo-minderbinder/AWS-PlantUML/release/18-2-22/dist
 
+  
+
 !define DEVICONS2 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
+
+  
 
 !define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
 
   
 
+  
+
 !includeurl AWSPUML/common.puml
+
+  
 
 !includeurl AWSPUML/General/AWScloud/AWScloud.puml
 
+  
+
 !includeurl AWSPUML/General/client/client.puml
+
+  
 
 !includeurl AWSPUML/General/user/user.puml
 
+  
+
 !includeurl AWSPUML/SDKs/Python/Python.puml
+
+  
 
 !includeurl AWSPUML/Compute/AmazonEC2/AmazonEC2.puml
 
+  
+
 !includeurl AWSPUML/Compute/AmazonEC2/instance/instance.puml
+
+  
 
 !includeurl AWSPUML/Storage/AmazonS3/AmazonS3.puml
 
+  
+
 !includeurl AWSPUML/Storage/AmazonS3/bucket/bucket.puml
+
+  
 
 !includeurl AWSPUML/Database/AmazonRDS/AmazonRDS.puml
 
+  
+
 !includeurl AWSPUML/Database/AmazonElasticCache/AmazonElasticCache.puml
+
+  
 
 !includeurl AWSPUML/Database/AmazonRDS/DBinstance/DBinstance.puml
 
+  
+
 !includeurl AWSPUML/NetworkingContentDelivery/AmazonVPC/AmazonVPC.puml
+
+  
 
 !includeurl AWSPUML/NetworkingContentDelivery/ElasticLoadBalancing/ElasticLoadBalancing.puml
 
+  
+
 !includeurl AWSPUML/ManagementTools/AmazonCloudWatch/AmazonCloudWatch.puml
 
+  
+
 !includeurl AWSPUML/Compute/AmazonEC2/AutoScaling/AutoScaling.puml
+
+  
 
 !includeurl AWSPUML/SecurityIdentityCompliance/AWSIAM/AWSIAM.puml
 
   
 
+  
+
 !include DEVICONS2/django.puml
+
+  
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+  
+
 !include DEVICONS/react.puml
+
+  
 
 !include DEVICONS/postgresql.puml
 
+  
+
 !include DEVICONS/nginx.puml
+
+  
 
 !include DEVICONS/python.puml
 
+  
+
 !include DEVICONS/redis.puml
+
+  
 
 skinparam componentArrowColor Black
 
+  
+
 skinparam componentBackgroundColor White
+
+  
 
 skinparam nodeBackgroundColor White
 
+  
+
 skinparam agentBackgroundColor Transparent
+
+  
 
 skinparam artifactBackgroundColor White
 
+  
+  
 
 USER(user1, user1)
+
 CLIENT(browser1, browser1)
-AMAZONVPC(vpc) {
-    ELASTICLOADBALANCING(loadbalancing) {
-        ELASTICLOADBALANCING(backendLoadBalancer, Backend Load Balancer)
-        ELASTICLOADBALANCING(frontendLoadBalancer, Frontend Load Balancer)
-        ELASTICLOADBALANCING(mediaLoadBalancer, Media Load Balancer)
-    }
 
-    System_Boundary(publicSubnet, "Public Subnet") {
-        AMAZONEC2(ec2Public)  {
-            AUTOSCALING(backendAutoScaling, Backend Auto Scaling)
-            INSTANCE(backendInstance, Backend) {
-                Container(nginxProxy, "Proxy", "Nginx", "Forwards requests, allows TLS", $sprite="nginx")
-
-                Container(djangoServer, "Server", "Django", "Processes requests", $sprite="django")
-            }
-
-            AUTOSCALING(frontendAutoScaling, Frontend Auto Scaling)
-            INSTANCE(frontendInstance, Frontend) {
-                Container(nginxServer, "Server", "Nginx", "Serves the static files, allows TLS", $sprite="nginx")
-                Container(reactStaticFiles, "Static files", "React", "Main user interaction interface", $sprite="react")
-            }
-        }
-    }
-
-    System_Boundary(privateSubnet, "Private Subnet") {
-        AMAZONEC2(ec2Private) {
-            AUTOSCALING(mediaAutoScaling, Media Auto Scaling)
-            INSTANCE(mediaInstance, Media) {
-                Container(mediaClient, "Client", "Python", "Processes media files", $sprite="python")
-            }
-        }
-
-        AMAZONRDS(rds) {
-            Container(BD, "Database", "Postgres", "", $sprite="postgresql")
-            DBINSTANCE(banco,Database)
-        }
-
-        AMAZONELASTICCACHE(elasticcache) {
-            Container(redis, "Cache", "Redis", "Cache for the database", $sprite="redis")
-        }
-    }
+Container(AWSIAM, "IAM Policies", "", ""){
+AWSIAM(myaccesss3,fullaccesss3)
 }
+
+AMAZONVPC(vpc) {
+
+ELASTICLOADBALANCING(loadbalancing) {
+
+ELASTICLOADBALANCING(backendLoadBalancer, Backend Load Balancer)
+
+ELASTICLOADBALANCING(frontendLoadBalancer, Frontend Load Balancer)
+
+ELASTICLOADBALANCING(mediaLoadBalancer, Media Load Balancer)
+
+}
+
+
+
+System_Boundary(publicSubnet, "Public Subnet") {
+
+AMAZONEC2(ec2Public) {
+
+AUTOSCALING(backendAutoScaling, Backend Auto Scaling)
+
+INSTANCE(backendInstance, Backend) {
+
+Container(nginxProxy, "Proxy", "Nginx", "Forwards requests, allows TLS", $sprite="nginx")
+
+  
+
+Container(djangoServer, "Server", "Django", "Processes requests", $sprite="django")
+
+}
+
+  
+
+AUTOSCALING(frontendAutoScaling, Frontend Auto Scaling)
+
+INSTANCE(frontendInstance, Frontend) {
+
+Container(nginxServer, "Server", "Nginx", "Serves the static files, allows TLS", $sprite="nginx")
+
+Container(reactStaticFiles, "Static files", "React", "Main user interaction interface", $sprite="react")
+
+}
+
+}
+
+}
+
+
+
+System_Boundary(privateSubnet, "Private Subnet") {
+
+AMAZONEC2(ec2Private) {
+
+AUTOSCALING(mediaAutoScaling, Media Auto Scaling)
+
+INSTANCE(mediaInstance, Media) {
+
+Container(mediaClient, "Client", "Python", "Processes media files", $sprite="python")
+
+}
+
+}
+
+  
+
+AMAZONRDS(rds) {
+
+Container(BD, "Database", "Postgres", "", $sprite="postgresql")
+
+DBINSTANCE(banco,Database)
+
+}
+
+  
+
+AMAZONELASTICCACHE(elasticcache) {
+
+Container(redis, "Cache", "Redis", "Cache for the database", $sprite="redis")
+
+}
+
+}
+
+}
+
+
+
 
 AMAZONS3(s3) {
-    BUCKET(bucket, "Bucket")
+
+BUCKET(bucket, "Bucket")
+
 }
 
+AMAZONCLOUDWATCH(cloudwatch, cloudwatch)
+
+
+
+
 user1 -> browser1
+
 browser1 -d-> frontendLoadBalancer
 
+
+
 backendLoadBalancer -d-> nginxProxy
+
 frontendLoadBalancer -d-> nginxServer
+
 mediaLoadBalancer -d-> mediaClient
 
+  
+
 backendAutoScaling -d-> backendInstance
+
 frontendAutoScaling -d-> frontendInstance
+
 mediaAutoScaling -d-> mediaInstance
 
+  
+
 nginxProxy -d-> djangoServer
+
 djangoServer -d-> BD
+
 djangoServer -d-> redis
-djangoServer -d-> bucket
+
+djangoServer -d--> bucket
+
+  
 
 nginxServer -d-> reactStaticFiles
+
 nginxServer -d-> backendLoadBalancer
 
+  
+
 mediaClient -d-> redis
-mediaClient -d-> bucket
+
+mediaClient -d--> bucket
+
+ 
 
 ' user1 -> browser1
 
+  
+
 ' browser1 -d-> nginxServer
 
+  
+
 ' nginxServer -d-> web_client1
+
 ' nginxServer -d-> web_server
 
+  
+
 ' web_server -d--> BD
+
+  
 
 ' web_client1 --> nginxServer
 
 
+ cloudwatch -r-> backendInstance
+ cloudwatch -r-> frontendInstance
+ cloudwatch -r-> mediaInstance
+ 
+ 
+ AWSIAM -r-> backendInstance
+ AWSIAM -r-> mediaInstance
+ 
+
+  
+
 @enduml
+
 ```
