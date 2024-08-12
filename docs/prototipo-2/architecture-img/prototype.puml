@@ -238,11 +238,11 @@ ELASTICLOADBALANCING(frontendLoadBalancer, Frontend Load Balancer)
 
   
 
-ELASTICLOADBALANCING(mediaLoadBalancer, Media Load Balancer)
+' ELASTICLOADBALANCING(mediaLoadBalancer, Media Load Balancer)
 
   
 
-}
+' }
 
   
   
@@ -411,7 +411,7 @@ frontendLoadBalancer -d-> nginxServer
 
   
 
-mediaLoadBalancer -d-> mediaClient
+' mediaLoadBalancer -d-> mediaClient
 
   
 
