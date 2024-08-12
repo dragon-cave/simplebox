@@ -113,6 +113,7 @@ permitindo que os usuários selecionem a qualidade desejada durante a reproduç�
 
 ## 4 Processamento de Áudio
 Propriedades comuns a áudios que a aplicação deve armazenar.
+
 **Nome do arquivo:** O nome do arquivo enviado.
 
 **Tamanho do arquivo:** O tamanho do arquivo enviado em bytes.
@@ -174,7 +175,7 @@ base em seu tipo (por exemplo, exibir imagem para objeto de imagem, reproduzir �
 Este repositório contém um arquivo bash script chamado `setup.sh` 
 que é responsável por configurar uma instância AWS EC2 com AMI Ubuntu 24.04.
 
-O projeto é composto por outros dois repositórios, [simplebox-ui](https://github.com/dragon-cave/simplebox-ui) e [simplebox-api](https://github.com/dragon-cave/simplebox-api), que são, respectivamente, o _frontend_ e o _backend_ do projeto.
+O projeto é composto por outros três repositórios, [simplebox-ui](https://github.com/dragon-cave/simplebox-ui) e [simplebox-api](https://github.com/dragon-cave/simplebox-api),[multimedia-processor](https://github.com/dragon-cave/multimedia-processor) que são, respectivamente, o _frontend_ , _backend_ e _processador de arquivos_  do projeto.
 
 O frontend foi escrito em TypeScript, utilizando React. Enquanto o backend foi escrito em Python, utilizando Django.
 
@@ -194,3 +195,40 @@ O script de configuração realiza as seguintes ações:
 - Ativação do Nginx, servindo os arquivos estáticos do frontend na porta 443 (HTTPS) e o servidor Django (Gunicorn) na porta 8000 (proxy reverso para a porta 8001).
 
 As configurações da nuvem devem seguir a política de privilégio mínimo: fornecer o mínimo de permissões apenas para garantir o funcionamento adequado do projeto. Portanto, o RDS não deve ter acesso público e deve ser conectado apenas à instância EC2 que irá executar o projeto. Além disso, o grupo de segurança da instância deve ter como _inbound rules_ a permissão para acessar as portas TCP 443 (HTTPS) e 8000 (API) de qualquer local IPv4, qualquer outro tráfego deve ser bloqueado.
+
+
+### Acesso Inicial
+
+Ao acessar a aplicação pela internet, a requisição do usuário é inicialmente direcionada ao **Gateway de Internet** configurado na VPC Amazon([Amazon Virtual Private Cloud](https://aws.amazon.com/pt/vpc/)). Esse gateway atua como um ponto de entrada para o tráfego externo, conectando a rede interna da VPC com a internet. A partir dele, a requisição é roteada para o **Frontend Load Balancer**, que está localizado em uma **Subrede Pública**. Este load balancer tem a responsabilidade de distribuir o tráfego entre as instâncias frontend, garantindo que nenhuma fique sobrecarregada.
+
+### Camada de Frontend
+
+As instâncias de frontend, que servem a interface do usuário, são compostas por um servidor **Nginx** e uma aplicação **React**. O **Nginx** é responsável por lidar com a terminação de TLS (ou seja, gerenciar as conexões seguras HTTPS) e por entregar os arquivos estáticos, como HTML, CSS, e JavaScript, diretamente para os usuários. A aplicação **React**, por sua vez, fornece a interface de usuário, permitindo interação direta com a aplicação.
+
+Essas instâncias são gerenciadas por um **Auto Scaling Group**. Esse grupo de Auto Scaling ajusta automaticamente o número de servidores frontend em resposta à demanda de tráfego, aumentando a capacidade durante picos de acesso e reduzindo-a quando o tráfego diminui, otimizando assim o uso de recursos e custos.
+
+### Camada de Backend
+
+ As operações que envolvem lógica de negócios são encaminhadas pelo **Nginx** localizado no frontend para o **Backend Load Balancer**. Este segundo load balancer redireciona o tráfego para instâncias backend, que também estão na **Subrede Pública**. Essas instâncias backend são compostas por um **Proxy Nginx** e um servidor **Django**.
+
+O **Nginx** na camada de backend atua como um proxy reverso, encaminhando as requisições para o servidor **Django**, que é o responsável por processar a lógica de negócios da aplicação, como manipulação de dados e interação com o banco de dados. Assim como no frontend, as instâncias backend são gerenciadas por um **grupo de Auto Scaling**, que ajusta o número de instâncias conforme necessário.
+
+### Banco de Dados e Fila de Tarefas
+
+Para armazenamento de dados, a aplicação utiliza um banco de dados [PostgresSQL](https://www.postgresql.org/docs/) hospedado no [Amazon RDS](https://docs.aws.amazon.com/pt_br/AmazonRDS/latest/UserGuide/Welcome.html), que está localizado em uma **Subrede Privada** para maior segurança. Isso significa que o banco de dados não está diretamente acessível pela internet, apenas por serviços dentro da VPC.
+
+Para gerenciar e processar tarefas de forma assíncrona, a aplicação utiliza o **Amazon SQS (Simple Queue Service)**. O SQS é responsável por criar e gerenciar filas de tarefas que serão executadas pelas instâncias de processamento. As tarefas, como o processamento de arquivos de mídia, são enviadas para uma fila no SQS, que armazena e organiza as tarefas até que as instâncias estejam prontas para processá-las.
+
+### Processamento de Arquivos de Mídia
+
+Quando a aplicação precisa processar arquivos de mídia, como imagens, áudios ou vídeos, as tarefas são extraídas da fila gerenciada pelo **Amazon SQS** e roteadas para a camada de processamento de mídia através de um **Media Load Balancer**. Esta camada é composta por instâncias especializadas no processamento de mídia. Essas instâncias utilizam ferramentas como **FFmpeg** ,**exiffread** e **soundfile** em conjunto com funções `subprocess` do Python para executar tarefas como extração de metadados dos arquivos de mídia , geração de thumbnails e vídeos em diferentes versões de resolução.
+
+### Armazenamento de Arquivos
+
+Os arquivos de mídia originais e os processados são armazenados no [Amazon S3](https://aws.amazon.com/pt/pm/serv-s3/), o que permite o acesso distribuído aos arquivos conforme for necessário entre as instâncias com acesso permitido, garantindo a integridade e disponibilidade desses dados.
+
+### Monitoramento e Segurança
+
+Para monitorar o desempenho e a saúde dos componentes da aplicação, o [Amazon CloudWatch](https://docs.aws.amazon.com/pt_br/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html) coleta métricas e logs de todas as instâncias e serviços utilizados. Isso permite um monitoramento contínuo e a configuração de medições que são utilizadas como condições inclusive como gatilho para os **grupos de auto scaling** definidos.
+
+Além disso, a segurança e permissões de acesso são gerenciadas através do ([IAM](https://aws.amazon.com/pt/iam/)). Este serviço assegura que todos os serviços e usuários dentro da AWS tenham apenas as permissões necessárias para desempenhar suas funções.
