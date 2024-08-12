@@ -175,7 +175,7 @@ base em seu tipo (por exemplo, exibir imagem para objeto de imagem, reproduzir �
 Este repositório contém um arquivo bash script chamado `setup.sh` 
 que é responsável por configurar uma instância AWS EC2 com AMI Ubuntu 24.04.
 
-O projeto é composto por outros três repositórios, [simplebox-ui](https://github.com/dragon-cave/simplebox-ui) e [simplebox-api](https://github.com/dragon-cave/simplebox-api),[multimedia-processor](https://github.com/dragon-cave/multimedia-processor) que são, respectivamente, o _frontend_ , _backend_ e _processador de arquivos_  do projeto.
+O projeto é composto por outros três repositórios, [simplebox-ui](https://github.com/dragon-cave/simplebox-ui), [simplebox-api](https://github.com/dragon-cave/simplebox-api) e [multimedia-processor](https://github.com/dragon-cave/multimedia-processor) que são, respectivamente, o _frontend_ , _backend_ e _processador de arquivos_  do projeto.
 
 O frontend foi escrito em TypeScript, utilizando React. Enquanto o backend foi escrito em Python, utilizando Django.
 
